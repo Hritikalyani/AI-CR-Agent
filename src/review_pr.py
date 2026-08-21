@@ -9,7 +9,7 @@ from src.llm_client import ask_llm
 REVIEW_SYSTEM_PROMPT = """
 You are a senior software engineer doing a code review.
 Given a PR diff,  identify:
-1. Bugs or logic erriors
+1. Bugs or logic errors
 2. Security vulnerabilities
 3. Style/Convention issues worth flagging
 4.Missing test coverage (if evident from the diff)

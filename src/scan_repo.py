@@ -13,22 +13,23 @@ from src.config import SCANNABLE_EXTENSIONS, SKIP_DIRS
 from src.llm_client import ask_llm
 
 SCAN_SYSTEM_PROMPT = """
-You are a helpful security focused code auditor reviewing a single source file
+You are a senior software engineer doing a code review on a single source file
 in isolation (you do not have the rest of the codebase).
 Identify:
-1. Security vulnerabilities(injection, unsafe deserialization, 
-hardcoded secrets, unvalidated input, etc.)
-2. Clear bugs or logic errors
-3. Obvious bad practices (bare excepts, resource leaks, etc.)
+1. Bugs or logic errors
+2. Risky coding patterns (e.g. bare excepts, resource leaks, hardcoded values, unsafe data handling)
+3. Obvious bad practices that reduce reliability or maintainability
 
-Be concise. If nothing significant stands out, say "No significant iissues found"
+Be concise. If nothing significant stands out, say "No significant issues found"
 rather than inventing minor nitpicks. Since you only see this one file, flag anything
-that *might* be a cross-file issue as "needs broader context to confirm" rather than 
+that *might* be a cross-file issue as "needs broader context to confirm" rather than
 asserting it's a problem.
 """
 
 def _find_scannable_files(repo_path: str) -> list[Path]:
-    root = Path(repo_path)
+    root = Path(repo_path).resolve()
+    if not root.exists() or not root.is_dir():
+        raise ValueError(f"Invalid repo path: {repo_path}")
     found = []
     for dirpath, dirnames, filenames in os.walk(root):
         dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]

@@ -17,6 +17,12 @@ def ask_llm(system_prompt: str, user_content: str, max_tokens: int = 1500) -> st
         config=types.GenerateContentConfig(
             system_instruction=system_prompt,
             max_output_tokens=max_tokens,
+            safety_settings=[
+                types.SafetySetting(
+                    category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                    threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                )
+            ]
         )
     )
     return response.text
