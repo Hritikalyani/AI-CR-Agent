@@ -4,6 +4,7 @@ Entrypoint: python -m src.cli <mode> [options]
 
 import argparse
 import sys
+import requests
 
 from src.config import GITHUB_TOKEN
 from src.review_pr import review_pr
@@ -21,24 +22,41 @@ def main():
     scan_parser = subparsers.add_parser("scan_repo", help="scan a local repo")
     scan_parser.add_argument("--path", required=True, help="path to local repo")
     scan_parser.add_argument("--max-files", type=int, default=25)
+    scan_parser.add_argument("--no-rag", action="store_true", help="Disable retrieval (Phase 1 Baseline)")
 
     args = parser.parse_args()
 
-    if args.mode == "review_pr":
-        if not GITHUB_TOKEN:
-            print("Missing Github Token in .env", file=sys.stderr)
-            sys.exit(1)
+    if args.mode == "review_pr" and args.repo.count("/") != 1:
+        print(f"--repo must be owner/name, got: {args.repo}", file=sys.stderr)
+        sys.exit(1)
 
-        review = review_pr(args.repo, args.pr, GITHUB_TOKEN)
-        print("\n=== PR Review ===\n")
-        print(review)
+    try:
+        if args.mode == "review_pr":
+            if not GITHUB_TOKEN:
+                print("Missing Github Token in .env", file=sys.stderr)
+                sys.exit(1)
 
-    elif args.mode == "scan_repo":
-        results = scan_repo(args.path, max_files=args.max_files)
-        print(f"\n=== Repo Scan: {len(results)} files reviewed ===\n")
-        for file_path, review in results.items():
-            print(f"\n--- {file_path} ---\n")
+            review = review_pr(args.repo, args.pr, GITHUB_TOKEN)
+            print("\n=== PR Review ===\n")
             print(review)
+
+        elif args.mode == "scan_repo":
+            results = scan_repo(args.path, max_files=args.max_files, use_rag=not args.no_rag)
+            print(f"\n=== Repo Scan: {len(results)} files reviewed ===\n")
+            for file_path, review in results.items():
+                print(f"\n--- {file_path} ---\n")
+                print(review)
+
+    except requests.exceptions.RequestException as e:
+        print(f"GitHub API error: {e}", file=sys.stderr)
+        sys.exit(1)
+    except ValueError as e:
+        print(f"Invalid input: {e}", file=sys.stderr)
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\nInterrupted.", file=sys.stderr)
+        sys.exit(130)
+
 
 if __name__ == "__main__":
     main()

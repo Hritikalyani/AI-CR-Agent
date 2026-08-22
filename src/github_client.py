@@ -17,7 +17,7 @@ def _headers(token: str) -> dict:
 def get_pr_diff(repo: str, pr_number: int, token: str) -> str:
     url = f"{GITHUB_API}/repos/{repo}/pulls/{pr_number}"
     headers = _headers(token)
-    headers["ACCEPT"] = "application/vnd.github.v3.diff"
+    headers["Accept"] = "application/vnd.github.v3.diff"
     resp = requests.get(url, headers=headers, timeout=30)
     resp.raise_for_status()
     return resp.text
