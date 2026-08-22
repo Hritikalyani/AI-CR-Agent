@@ -33,3 +33,21 @@ SCANNABLE_EXTENSIONS = {
 }
 
 SKIP_DIRS = {".git", "node_modules", "venv", "__pycache__", "dist", "build"}
+
+
+# --- RAG SETTINGS --- #
+
+EMBEDDING_MODEL = "all-MiniLM-L6-v2" # from sentence-transformers
+
+CHROMA_PERSIST_DIR = "./chroma_db"
+CHROMA_COLLECTION = "codebase"
+
+# --- No of related chunks to inject per file under review --- #
+
+RETRIEVAL_TOP_K = 5
+
+# --- FallBack for chunking when AST Parsing isn't available for a lamguage --- #
+
+FALLBACK_CHUNK_LINES = 60
+FALLBACK_CHUNK_OVERLAP = 10
+
