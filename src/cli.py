@@ -55,7 +55,7 @@ def main():
             from src.agent import run_agent, build_tool_schemas, execute_tool
             goal = (f"Review Pull Request #{args.pr} in the repository"
                     f"{args.repo}. Post your review when done.")
-            print(run_agent(goal, build_tool_schemas, execute_tool))
+            print(run_agent(goal, build_tool_schemas(), execute_tool))
 
 
     except requests.exceptions.RequestException as e:

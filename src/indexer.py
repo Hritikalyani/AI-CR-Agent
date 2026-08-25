@@ -31,7 +31,8 @@ def _get_collection():
     return _collection
 
 def _chunk_id(chunk: Chunk) -> str:
-    raw = f"{chunk.file_path}:{chunk.start_line}:{chunk.end_line}"
+    symbol = chunk.symbol or ""
+    raw = f"{chunk.file_path}:{chunk.start_line}:{chunk.symbol}:{chunk.end_line}"
     return hashlib.sha1(raw.encode()). hexdigest()
 
 def build_index(repo_path: str, verbose: bool = True) -> int:
@@ -82,13 +83,14 @@ def retrieve_related(query_text: str, exclude_file: str | None = None, k: int = 
     results = collection.query(query_embeddings=query_emb, n_results=k * 3)
 
     out = []
-    for doc, meta, dist in zip(
+    for doc, meta in zip(
         results["documents"][0],
-        results["metadatas"][0],
-        results["distances"][0]):
-        if exclude_file and meta["file_path"] == str(Path(exclude_file).resolve()):
+        results["metadatas"][0]):
+
+        if exclude_file and meta.get("file_path") == str(Path(exclude_file).resolve()):
             continue
-        out.append({"content": doc, "meta": meta, "distance": dist})
+
+        out.append({"content": doc, "meta": meta})
         if len(out) >= k:
             break
 
