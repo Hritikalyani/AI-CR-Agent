@@ -31,7 +31,8 @@ def _get_collection():
     return _collection
 
 def _chunk_id(chunk: Chunk) -> str:
-    raw = f"{chunk.file_path}:{chunk.start_line}:{chunk.end_line}"
+    symbol = chunk.symbol or ""
+    raw = f"{chunk.file_path}:{chunk.start_line}:{chunk.symbol}:{chunk.end_line}"
     return hashlib.sha1(raw.encode()). hexdigest()
 
 def build_index(repo_path: str, verbose: bool = True) -> int:
@@ -78,17 +79,12 @@ def retrieve_related(query_text: str, exclude_file: str | None = None, k: int = 
     model = _get_model()
 
     query_emb = model.encode([query_text]).tolist()
-
     results = collection.query(query_embeddings=query_emb, n_results=k * 3)
 
+    # BUG SEEDED: Returning flat dict instead of nested c["meta"]["file_path"] and c["content"]
     out = []
-    for doc, meta, dist in zip(
-        results["documents"][0],
-        results["metadatas"][0],
-        results["distances"][0]):
-        if exclude_file and meta["file_path"] == str(Path(exclude_file).resolve()):
-            continue
-        out.append({"content": doc, "meta": meta, "distance": dist})
+    for doc, meta in zip(results["documents"][0], results["metadatas"][0]):
+        out.append({"code_chunk": doc, "file_path": meta["file_path"]})
         if len(out) >= k:
             break
 
