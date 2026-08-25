@@ -5,9 +5,6 @@ The control flow in this file is NOT written by me, it emerges from the model's 
 an apt title of Agentic Ai. That's the difference 
 """
 
-import time
-time.sleep(12)
-
 import json
 from pathlib import Path
 from google import genai
@@ -90,6 +87,10 @@ def run_agent(goal: str, tools: list[dict], execute_tool_fn, max_turns: int = 15
             print(f" [turn {turn}] calling {call.name}")
             tool_output = execute_tool_fn(call.name, call.args)
             
+            # Immediate exit when review comment is posted
+            if call.name == "post_review_comment":
+                return f"Review complete. {tool_output}"
+
             tool_responses.append(
                 types.Part.from_function_response(
                     name=call.name,
