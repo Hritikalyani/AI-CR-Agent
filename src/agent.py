@@ -145,7 +145,7 @@ def build_tool_schemas() -> list[dict]:
                 },
                 {
                     "name": "post_review_comment",
-                    "description": "Post your finished review as a comment on the PR. Call this EXACTLY ONCE at the end of your workflow.",
+    "description": "Post your finished review as a comment on the PR. Call this ONCE, only when your review is complete, and stop.",
                     "parameters": {
                         "type": "OBJECT",
                         "properties": {
