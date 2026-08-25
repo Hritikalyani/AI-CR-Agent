@@ -7,7 +7,7 @@ from src.config import GEMINI_API_KEY, GEMINI_MODEL
 
 _client = genai.Client(api_key=GEMINI_API_KEY)
 
-def ask_llm(system_prompt: str, user_content: str, max_tokens: int = 1500) -> str:
+def ask_llm(system_prompt: str, user_content: str, max_tokens: int = 4000) -> str:
     """
     Sends code to gemini and returns the LLM's review text.
     """
@@ -25,4 +25,6 @@ def ask_llm(system_prompt: str, user_content: str, max_tokens: int = 1500) -> st
             ]
         )
     )
+    if not response.text:
+        return "(No response returned — possibly blocked or empty.)"
     return response.text

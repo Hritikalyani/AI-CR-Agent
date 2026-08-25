@@ -24,6 +24,10 @@ def main():
     scan_parser.add_argument("--max-files", type=int, default=25)
     scan_parser.add_argument("--no-rag", action="store_true", help="Disable retrieval (Phase 1 Baseline)")
 
+    agent_parser = subparsers.add_parser("agent-review", help="Autonomous Agentic PR review (Phase 3)")
+    agent_parser.add_argument("--repo", required=True)
+    agent_parser.add_argument("--pr", required=True, type=int)
+
     args = parser.parse_args()
 
     if args.mode == "review_pr" and args.repo.count("/") != 1:
@@ -46,6 +50,13 @@ def main():
             for file_path, review in results.items():
                 print(f"\n--- {file_path} ---\n")
                 print(review)
+
+        elif args.mode == "agent-review":
+            from src.agent import run_agent, build_tool_schemas, execute_tool
+            goal = (f"Review Pull Request #{args.pr} in the repository"
+                    f"{args.repo}. Post your review when done.")
+            print(run_agent(goal, build_tool_schemas, execute_tool))
+
 
     except requests.exceptions.RequestException as e:
         print(f"GitHub API error: {e}", file=sys.stderr)

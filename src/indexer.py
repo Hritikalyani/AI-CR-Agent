@@ -63,7 +63,7 @@ def build_index(repo_path: str, verbose: bool = True) -> int:
         embeddings=embeddings,
         documents=texts,
         metadatas=[{
-            "file_path": c.file_path,
+            "file_path": str(Path(c.file_path).resolve()),
             "start_line": c.start_line,
             "end_line": c.end_line,
             "symbol": c.symbol or "",
@@ -86,7 +86,7 @@ def retrieve_related(query_text: str, exclude_file: str | None = None, k: int = 
         results["documents"][0],
         results["metadatas"][0],
         results["distances"][0]):
-        if exclude_file and meta["file_path"] == exclude_file:
+        if exclude_file and meta["file_path"] == str(Path(exclude_file).resolve()):
             continue
         out.append({"content": doc, "meta": meta, "distance": dist})
         if len(out) >= k:
